@@ -1,8 +1,8 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-dotenv.config({ path: __dirname + '../../../.env' })
 
-console.log(process.env);
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
 
 export const BITQUERY_URL = 'https://graphql.bitquery.io';
 

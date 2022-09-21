@@ -1,150 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { hierarchy, HierarchyPointNode, tree } from 'd3-hierarchy';
 import ReactFlow, {
   Controls,
   Edge,
+  MiniMap,
   Node,
   Position,
   ReactFlowProvider,
+  useReactFlow,
   useNodesState,
   useEdgesState
 } from 'react-flow-renderer';
-import { TRANSACTION_FLOW_IN_OUT } from '../gql/queries/transactionFlowInAndOut';
-import { client } from '../gql/apolloClient';
-import AppHeader from '../components/AppHeader';
 import { Input, Row, Select, Spin, Tooltip } from 'antd';
 import { InfoCircleOutlined, LoadingOutlined } from '@ant-design/icons';
-import { LoaderLogo } from '../components/loaders/loaderLogo';
 import { MarkerType } from 'react-flow-renderer';
-import BetaLogo from '../components/betaLogo';
-import { CounterParty } from '../gql/interfaces/counterParty.interface';
-import { useLazyQuery, useQuery } from '@apollo/client';
+import { client } from './gql/apolloClient';
+import { CounterParty } from './gql/interfaces/counterParty.interface';
+import { TRANSACTION_FLOW_IN_OUT } from './gql/queries/transactionFlowInAndOut';
+import { TreeNode } from './graphUtils/TreeNode';
+import { getReactFlowNodesAndEdges } from './graphUtils/buildElements';
+const { Option } = Select;
 
-const layout = tree<TreeNode<CounterParty>>().nodeSize([100, 1000]);
-
-function getElements(
-  nodesIncoming: HierarchyPointNode<TreeNode<CounterParty>>,
-  nodesOutgoing: HierarchyPointNode<TreeNode<CounterParty>>
-) {
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
-  const seen: Map<string, any> = new Map();
-  [nodesIncoming, nodesOutgoing].forEach((value, index) => {
-    const incoming: boolean = index === 0;
-
-    for (const d of value.descendants()) {
-      if (seen.get(d.data.id) !== undefined) continue;
-      const addrSubstring = `${d.data.id.substring(0, 8)}...${d.data.id.substring(
-        d.data.id.length - 8,
-        d.data.id.length
-      )}`;
-
-      nodes.push({
-        id: `${d.data.id}`,
-        data: {
-          label: (
-            <div>
-              <div>
-                {' '}
-                {d.data.data.annotation != undefined && d.data.data.annotation.length > 0
-                  ? d.data.data.annotation
-                  : addrSubstring}{' '}
-              </div>{' '}
-              <Tooltip title={'Double click a node to retrieve more transactions.'} color={'#404040'}>
-                <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
-              </Tooltip>{' '}
-            </div>
-          ),
-          depth: d.depth,
-          annotation: d.data.data.annotation
-        },
-        position: { x: (incoming ? -1 : 1) * d.y, y: d.x },
-        style: {
-          // font: '20px sans-serif',
-          width: 400,
-          fontWeight: '300',
-          fontSize: '20px',
-          // background: '#D6D5E6',
-          color: '#333',
-          border: '2px solid #d98c01'
-        },
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left
-      });
-      seen.set(d.data.id, '');
-    }
-
-    value.links().forEach((d) =>
-      edges.push({
-        id: `${incoming ? d.target.data.data.address : d.source.data.data.address}->${incoming ? d.source.data.data.address : d.target.data.data.address
-          }`,
-        source: incoming ? d.target.data.data.address : d.source.data.data.address,
-        target: incoming ? d.source.data.data.address : d.target.data.data.address,
-        data: {},
-        style: {
-          stroke: incoming ? '#45f542' : '#ba1111',
-          strokeWidth: 5
-        },
-        markerEnd: { type: MarkerType.ArrowClosed }
-      })
-    );
-  });
-
-  return { nodes, edges };
-}
-
-const map: Map<string, TreeNode<CounterParty>> = new Map();
-
-class TreeNode<T> {
-  public map: Map<any, TreeNode<T>>;
-  public data: T;
-  public id: any;
-  public incoming: TreeNode<T>[] = [];
-  public outgoing: TreeNode<T>[] = [];
-
-  constructor(
-    map: Map<any, TreeNode<T>>,
-    data: T,
-    id: any,
-    incoming: TreeNode<T>[] = [],
-    outgoing: TreeNode<T>[] = []
-  ) {
-    this.map = map;
-    this.data = data;
-    this.id = id;
-    // Add this node to the map
-    this.map.set(this.id, this);
-    this.addIncomings(incoming);
-    this.addOutgoings(outgoing);
-  }
-
-  addIncoming(incoming: TreeNode<T>) {
-    // First add it to the map for easy lookup
-    this.map.set(this.id, incoming);
-    this.incoming.push(incoming);
-  }
-
-  addIncomings(incomings: TreeNode<T>[]) {
-    incomings.forEach((node) => this.addIncoming(node));
-  }
-
-  addOutgoing(outgoing: TreeNode<T>) {
-    // First add it to the map for easy lookup
-    this.map.set(this.id, outgoing);
-    this.outgoing.push(outgoing);
-  }
-
-  addOutgoings(outgoings: TreeNode<T>[]) {
-    outgoings.forEach((node) => this.addOutgoing(node));
-  }
-}
-
-interface graphElements {
-  nodes: Node[];
-  edges: Edge[];
-}
+const layout = tree<TreeNode<any>>().nodeSize([100, 1000]);
+const map: Map<string, TreeNode<any>> = new Map();
 
 const Graph: React.FC = () => {
+  const [loading, setLoading] = useState(false);
   const [address, setAddress] = useState('');
   const [rootData, setRootData] = useState(
     new TreeNode<CounterParty>(
@@ -153,99 +34,30 @@ const Graph: React.FC = () => {
         address: '',
         contractType: '',
         name: '',
-        symbol: ''
+        symbol: '',
       },
       ''
     )
   );
-
-
   const nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
   const nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-  const initialElements = getElements(nodesIncoming, nodesOutgoing);
+  getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
   const antIcon = <LoadingOutlined style={{ fontSize: 200 }} spin />;
 
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  let graphElements: any[] = [];
 
-  const [
-    getTransactionFlowData,
-    { loading, error, data }
-  ] = useLazyQuery(TRANSACTION_FLOW_IN_OUT);
+  const { fitView } = useReactFlow();
 
-
-  const handleSearch = async () => {
-
-    const queryDepth = 4;
-    const rootData = new TreeNode(map, { address: address, contractType: '', name: '', symbol: '' }, address);
-    setRootData(rootData);
-    let nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
-    let nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-    const initialElements = getElements(nodesIncoming, nodesOutgoing);
-    setNodes(initialElements.nodes);
-    setEdges(initialElements.edges);
-
-    const response = await getTransactionFlowData(
-      {
-        variables: {
-          inboundDepth: queryDepth,
-          outboundDepth: queryDepth,
-          address: '0x0e9363c3492253384c4f6cc3fcb61e51b537f8f4',
-          currency: 'ETH',
-          from: '2021-08-01',
-          till: '2022-01-01'
-        }
-      }
-    )
-
-    const queryData = response.data ?? {
-      transactionFlow: { inbound: new Array<CounterParty>(), outbound: new Array<CounterParty>() }
-    };
-
-    const treeNode = map.get(rootData.id)!;
-    treeNode.addIncomings(
-      queryData.transactionFlow.inbound.filter((trans: any) => trans.depth == 1).map((d: any) => new TreeNode(map, d.sender, d.sender.address))
-    );
-    treeNode.addOutgoings(
-      queryData.transactionFlow.outbound.filter((trans: any) => trans.depth == 1).map((d: any) => new TreeNode(map, d.reciever, d.reciever.address))
-    );
-
-    nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
-    nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-    const elements = getElements(nodesIncoming, nodesOutgoing);
-    graphElements = elements.nodes;
-
-    setNodes(elements.nodes);
-    setEdges(elements.edges);
-
-    for (let i = 2; i < queryDepth; i++) {
-
-      graphElements.forEach((node: any) => {
-        const treeNode = map.get(node.id)!;
-        treeNode.addIncomings(
-          queryData.transactionFlow.inbound.filter((trans: any) => trans.depth == i && trans.reciever.address === node.id).map((d: any) => new TreeNode(map, d.sender, d.sender.address))
-        );
-        treeNode.addOutgoings(
-          queryData.transactionFlow.outbound.filter((trans: any) => trans.depth == i && trans.sender.address === node.id).map((d: any) => new TreeNode(map, d.reciever, d.reciever.address))
-        );
-
-        nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
-        nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-
-        const elements = getElements(nodesIncoming, nodesOutgoing);
-        graphElements = elements.nodes;
-
-        setNodes(elements.nodes);
-        setEdges(elements.edges);
-      })
-    }
-  };
+  useEffect(() => {
+    fitView({ duration: 200 });
+  });
 
   const handleNodeClick = async (_: any, node: Node) => {
     if (loading) return;
     if (node.data.annotation != undefined && node.data.annotation.length > 0) return;
 
+    setLoading(true);
     const response = await client.query({
       query: TRANSACTION_FLOW_IN_OUT,
       variables: {
@@ -253,45 +65,61 @@ const Graph: React.FC = () => {
         outboundDepth: 1,
         address: node.id,
         currency: 'ETH',
-        from: '2021-08-01',
-        till: '2022-07-06T23:59:59'
+        from: '2022-08-01',
+        till: '2022-09-06T23:59:59'
       }
     });
-    const queryData = response.data ?? {
-      transactionFlow: { inbound: new Array<CounterParty>(), outbound: new Array<CounterParty>() }
+    console.log(response);
+    const transactionFlowData = response.data ?? {
+      transactionFlow: { inbound: new Array<any>(), outbound: new Array<any>() }
     };
+
     const treeNode = map.get(node.id)!;
     treeNode.addIncomings(
-      queryData.transactionFlow.inbound.map((d: any) => new TreeNode(map, d.sender, d.sender.address))
+      transactionFlowData.transactionFlow.inbound.map((d: any) => {
+        let data = {
+          sender: d.sender,
+          amount: d.amount,
+          symbol: d.symbol
+        }
+        return new TreeNode(map, data, d.sender.address)
+      })
     );
     treeNode.addOutgoings(
-      queryData.transactionFlow.outbound.map((d: any) => new TreeNode(map, d.reciever, d.reciever.address))
+      transactionFlowData.transactionFlow.outbound.map((d: any) => new TreeNode(map, d.reciever, d.reciever.address))
     );
 
     const nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
+    console.log('nodesIncoming here ===>', nodesIncoming);
     const nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-    const elements = getElements(nodesIncoming, nodesOutgoing);
+    console.log('nodesOutgoing here ===>', nodesOutgoing);
+
+    const elements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
+
+
     setNodes(elements.nodes);
     setEdges(elements.edges);
+    setLoading(false);
   };
+
 
   function updateRoot() {
     const rootData = new TreeNode(map, { address: address, contractType: '', name: '', symbol: '' }, address);
     setRootData(rootData);
     const nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
     const nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-    const initialElements = getElements(nodesIncoming, nodesOutgoing);
+
+    const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
     setNodes(initialElements.nodes);
     setEdges(initialElements.edges);
   }
 
   return (
     <div className="h-screen">
-      <AppHeader />
       <div className="h-20 flex items-center justify-center px-2">
         <Row className="w-full flex items-center">
           <Select defaultValue="1" style={{ width: '200px' }}>
-            <option value="1">Ethereum Mainnet</option>
+            <Option value="1">Ethereum Mainnet</Option>
             {/* <option value="120">Bitcoin Mainnet</option> */}
           </Select>
           <Input
@@ -305,7 +133,7 @@ const Graph: React.FC = () => {
 
           <button
             className="ml-3 cursor-pointer font-sm rounded-sm border border-primary text-background bg-primary px-4 py-1 font-sm sm:text-xs md:text-sm"
-            onClick={handleSearch}>
+            onClick={updateRoot}>
             Search
           </button>
         </Row>
@@ -320,13 +148,14 @@ const Graph: React.FC = () => {
             minZoom={-Infinity}
             zoomOnScroll={true}
             style={{ background: '#0f0f0f0f' }}
-            fitView>
+            fitView
+          >
             <Controls />
           </ReactFlow>
         </div>
         {loading ? (
           <div className="z-50 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-            <LoaderLogo />
+            Loading...
           </div>
         ) : (
           <></>
@@ -342,7 +171,6 @@ const TransactionGraph: React.FC = () => {
       <ReactFlowProvider>
         <Graph />
       </ReactFlowProvider>
-      <BetaLogo />
     </div>
   );
 };
