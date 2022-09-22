@@ -11,7 +11,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { MarkerType } from 'react-flow-renderer';
 
 
-const newNode = (nodeData: HierarchyPointNode<TreeNode<CounterParty>>, incoming: boolean) => {
+const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean) => {
 
     const addrSubstring: string = `${nodeData.data.id.substring(0, 8)}...${nodeData.data.id.substring(
         nodeData.data.id.length - 8,
@@ -37,7 +37,8 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<CounterParty>>, incoming:
         fontWeight: '300',
         fontSize: '20px',
         color: '#333',
-        border: '2px solid #d98c01'
+        border: '2px solid #18181b',
+        borderRadius: '10px'
     }
 
     return {
@@ -54,10 +55,12 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<CounterParty>>, incoming:
     }
 }
 
-const newEdge = (edgeData: HierarchyPointLink<TreeNode<CounterParty>>, incoming: boolean) => {
-    const targetEdgeAddress = edgeData.target.data.data.address;
-    const sourceEdgeAddress = edgeData.source.data.data.address;
+const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean) => {
 
+    const targetEdgeAddress = edgeData.target.data.id;
+    const sourceEdgeAddress = edgeData.source.data.id;
+
+    console.log('here is edge data', edgeData);
     const labelStyle = {
         fontSize: '20px'
     }
@@ -67,13 +70,18 @@ const newEdge = (edgeData: HierarchyPointLink<TreeNode<CounterParty>>, incoming:
         strokeWidth: 5,
     }
 
+    const currencyAmount: number = edgeData.target.data.data.amount as number;
+
+
+
     return (
         {
             id: `${incoming ? targetEdgeAddress : sourceEdgeAddress}->${incoming ? sourceEdgeAddress : targetEdgeAddress
                 }`,
             source: incoming ? targetEdgeAddress : sourceEdgeAddress,
             target: incoming ? sourceEdgeAddress : targetEdgeAddress,
-            label: "test",
+            label: `${edgeData.target.data.data.amount.toPrecision(5)
+                } ${edgeData.target.data.data.symbol}`,
             labelStyle: labelStyle,
             style: arrowStyle,
             markerEnd: { type: MarkerType.ArrowClosed }
@@ -88,8 +96,8 @@ Given d-3 descendants and links, we need to convert this data to fit our react-f
 @param nodesOutgoing outgoing transactions, d3-hierarchy nodes to build our data tree for rendering
 */
 export const getReactFlowNodesAndEdges = (
-    nodesIncoming: HierarchyPointNode<TreeNode<CounterParty>>,
-    nodesOutgoing: HierarchyPointNode<TreeNode<CounterParty>>
+    nodesIncoming: HierarchyPointNode<TreeNode<any>>,
+    nodesOutgoing: HierarchyPointNode<TreeNode<any>>
 ) => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];

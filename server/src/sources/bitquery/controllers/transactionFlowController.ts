@@ -10,6 +10,8 @@ export async function getTransactionFlowData(transactionFlowArgs: TransactionFlo
   const now = new Date();
   const oneMonthAgo = new Date(now);
   oneMonthAgo.setDate(now.getDate() - 30);
+  console.log("transactionFlow args on server hitting here", transactionFlowArgs);
+  console.log("heres what date should look like", oneMonthAgo.toISOString());
   try {
     await bitqueryAxiosInstance
       .post('', {
@@ -20,8 +22,8 @@ export async function getTransactionFlowData(transactionFlowArgs: TransactionFlo
           network: transactionFlowArgs.network,
           address: transactionFlowArgs.address,
           currency: transactionFlowArgs.currency,
-          from: oneMonthAgo.toISOString(),
-          till: now.toISOString()
+          from: transactionFlowArgs.from,
+          till: transactionFlowArgs.till
         }
       })
       .then(
@@ -54,8 +56,8 @@ export async function getInboundTransactionFlowData(
           network: transactionFlowArgs.network,
           address: transactionFlowArgs.address,
           currency: transactionFlowArgs.currency,
-          from: oneMonthAgo.toISOString(),
-          till: now.toISOString()
+          from: transactionFlowArgs.from,
+          till: transactionFlowArgs.till
         }
       })
       .then(
@@ -88,8 +90,8 @@ export async function getOutboundTransactionFlowData(
           network: transactionFlowArgs.network,
           address: transactionFlowArgs.address,
           currency: transactionFlowArgs.currency,
-          from: oneMonthAgo.toISOString(),
-          till: now.toISOString()
+          from: transactionFlowArgs.from,
+          till: transactionFlowArgs.till
         }
       })
       .then(
