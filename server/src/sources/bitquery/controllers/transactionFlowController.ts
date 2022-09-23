@@ -1,3 +1,4 @@
+import { Transactions } from './../../../types/transactionFlow/transactions';
 import { TransactionFlowArgs } from './../../../args/transactionFlow.args';
 import { TransactionFlow } from './../interfaces/transactionFlow.interface';
 import { bitqueryAxiosInstance } from '../config';
@@ -5,13 +6,8 @@ import { TRANSACTION_FLOW_QUERY } from '../queries/TransactionFlowQuery';
 import { INBOUND_TRANSACTION_FLOW_QUERY } from '../queries/inboundTransactionFlowQuery';
 import { OUTBOUND_TRANSACTION_FLOW_QUERY } from '../queries/outboundTransactionFlowQuery';
 
-export async function getTransactionFlowData(transactionFlowArgs: TransactionFlowArgs): Promise<TransactionFlow> {
-  let responseData: TransactionFlow;
-  const now = new Date();
-  const oneMonthAgo = new Date(now);
-  oneMonthAgo.setDate(now.getDate() - 30);
-  console.log("transactionFlow args on server hitting here", transactionFlowArgs);
-  console.log("heres what date should look like", oneMonthAgo.toISOString());
+export async function getTransactionFlowData(transactionFlowArgs: TransactionFlowArgs): Promise<Transactions> {
+  let responseData: Transactions;
   try {
     await bitqueryAxiosInstance
       .post('', {
@@ -28,7 +24,7 @@ export async function getTransactionFlowData(transactionFlowArgs: TransactionFlo
       })
       .then(
         (response: any) => {
-          responseData = response.data.data.ethereum;
+          responseData = response.data.data.ethereum as Transactions;
         },
         (onRejected: any) => {
           console.error('Error in bitquery/controller/getTransactionFlowData', transactionFlowArgs, onRejected);
@@ -63,6 +59,7 @@ export async function getInboundTransactionFlowData(
       .then(
         (response: any) => {
           responseData = response.data.data.ethereum;
+          console.log(response.data.data.ethereum.inbound.receiver);
         },
         (onRejected: any) => {
           console.error('Error in bitquery/controller/getInboundTransactionFlowData', transactionFlowArgs, onRejected);

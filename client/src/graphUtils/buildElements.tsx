@@ -1,4 +1,3 @@
-import { CounterParty } from "../gql/interfaces/counterParty.interface";
 import { TreeNode } from "./TreeNode";
 import { HierarchyPointNode, HierarchyPointLink } from 'd3-hierarchy';
 import {
@@ -13,6 +12,9 @@ import { MarkerType } from 'react-flow-renderer';
 
 const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean) => {
 
+    console.log('nodedata,', nodeData);
+    const data = nodeData.data.data.data;
+
     const addrSubstring: string = `${nodeData.data.id.substring(0, 8)}...${nodeData.data.id.substring(
         nodeData.data.id.length - 8,
         nodeData.data.id.length
@@ -22,7 +24,7 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
         <div>
             <div>
                 {' '}
-                {nodeData.data.data.annotation != undefined && nodeData.data.data.annotation.length > 0
+                {nodeData.data.data.annotation !== undefined && nodeData.data.data.annotation.length > 0
                     ? nodeData.data.data.annotation
                     : addrSubstring}{' '}
             </div>{' '}
@@ -47,20 +49,20 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
             label: labelContent,
             depth: nodeData.depth,
             annotation: nodeData.data.data.annotation
+
         },
         position: { x: (incoming ? -1 : 1) * nodeData.y, y: nodeData.x },
         style: nodeStyle,
         sourcePosition: Position.Right,
-        targetPosition: Position.Left
+        targetPosition: Position.Left,
     }
 }
 
 const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean) => {
-
     const targetEdgeAddress = edgeData.target.data.id;
     const sourceEdgeAddress = edgeData.source.data.id;
+    const data = edgeData.target.data.data.data;
 
-    console.log('here is edge data', edgeData);
     const labelStyle = {
         fontSize: '20px'
     }
@@ -70,21 +72,16 @@ const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean)
         strokeWidth: 5,
     }
 
-    const currencyAmount: number = edgeData.target.data.data.amount as number;
-
-
-
     return (
         {
-            id: `${incoming ? targetEdgeAddress : sourceEdgeAddress}->${incoming ? sourceEdgeAddress : targetEdgeAddress
-                }`,
+            id: `${data.transaction.hash}-${incoming ? targetEdgeAddress : sourceEdgeAddress}->${incoming ? sourceEdgeAddress : targetEdgeAddress}`,
             source: incoming ? targetEdgeAddress : sourceEdgeAddress,
             target: incoming ? sourceEdgeAddress : targetEdgeAddress,
-            label: `${edgeData.target.data.data.amount.toPrecision(5)
-                } ${edgeData.target.data.data.symbol}`,
+            label: `${data.amount.toPrecision(5)
+                } ${data.currency.symbol}`,
             labelStyle: labelStyle,
             style: arrowStyle,
-            markerEnd: { type: MarkerType.ArrowClosed }
+            markerEnd: { type: MarkerType.ArrowClosed },
         }
     )
 }

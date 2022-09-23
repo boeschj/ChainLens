@@ -1,11 +1,11 @@
-import { Sender } from './sender';
 import { Field, ObjectType } from 'type-graphql';
-import { Receiver } from './receiver';
 import { Currency } from './currency';
+import { Receiver } from './receiver';
+import { Sender } from './sender';
 import { Transaction } from './transaction';
 
-@ObjectType({ description: "Transaction details of an outgoing transaction from a given address" })
-export class Outbound {
+@ObjectType({ description: "Transaction details of an incoming transaction from a given address" })
+export class Inbound {
     @Field(() =>
         Number
         , { description: 'The amount of currency being sent' })

@@ -6,14 +6,8 @@ export class Currency {
         String
         , { description: 'The symbol of the currency' })
     public symbol!: string;
-
     @Field(() =>
         String
         , { description: 'The name of the currency' })
-    public name!: string;
+    public address!: string;
 }
-
-// export interface Currency {
-//     symbol: string;
-//     name: string;
-// }

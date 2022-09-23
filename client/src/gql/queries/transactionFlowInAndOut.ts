@@ -26,7 +26,7 @@ export const TRANSACTION_FLOW_IN_OUT = gql`
           symbol
           name
         }
-        reciever {
+        receiver {
           address
           annotation
           contractType
@@ -46,7 +46,7 @@ export const TRANSACTION_FLOW_IN_OUT = gql`
           symbol
           name
         }
-        reciever {
+        receiver {
           address
           annotation
           contractType

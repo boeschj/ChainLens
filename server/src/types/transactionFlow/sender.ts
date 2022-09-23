@@ -1,24 +1,11 @@
 import { Field, ObjectType } from 'type-graphql';
-import { SmartContract } from './SmartContract'
 
-@ObjectType({ description: "The Transaction Flow parent object" })
-export class CounterParty {
-    @Field(() => String, { description: 'The address of a transaction participant' })
+@ObjectType({ description: "The sending counterparty of a transaction" })
+export class Sender {
+    @Field(() => String, { description: 'The address of the sender' })
     public address!: string;
-
     @Field(() =>
         String
-        , { nullable: true, description: 'An optional annotation identifying the transaction participant' })
+        , { nullable: true, description: 'An optional annotation identifying the transaction sender' })
     public annotation?: string;
-
-    @Field(() =>
-        SmartContract
-        , { nullable: true, description: 'Information about any smart contract interactions' })
-    public smartContract?: SmartContract;
 }
-
-// export interface CounterParty {
-//     address: string;
-//     annotation?: string;
-//     smartContract: SmartContract;
-// }
