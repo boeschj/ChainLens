@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import './index.css';
+import './styles/index.css'
 import 'antd/dist/antd.less';
-import App from './App';
+import Router from './router';
 import { ApolloProvider } from '@apollo/client';
 import { client } from './gql/apolloClient';
 
@@ -14,7 +14,7 @@ root.render(
   <BrowserRouter>
     <ApolloProvider client={client}>
       <React.StrictMode>
-        <App />
+        <Router />
       </React.StrictMode>
     </ApolloProvider>
   </BrowserRouter>

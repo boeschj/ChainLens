@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import blocktraceLogo from './assets/blocktraceLogo.png';
+import blocktraceLogo from '../assets/blocktraceLogo.png';
 import {
   ReactFlowProvider,
 } from 'react-flow-renderer';
-import { Button, Input, Row } from 'antd';
+import { Button, Input, Modal, Row } from 'antd';
 import moment from 'moment';
-import Graph from './graph';
-import DateRangePicker from './components/DateRangePicker';
-import DropdownListSelect from './components/DropdownListSelect';
+import TransactionFlowGraph from '../components/TransactionFlowGraph';
+import DateRangePicker from '../components/DateRangePicker';
+import DropdownListSelect from '../components/DropdownListSelect';
 
 export interface IQueryParams {
   inboundDepth: number,
@@ -18,7 +18,7 @@ export interface IQueryParams {
   till: string,
 }
 
-const GraphInputs: React.FC = () => {
+const TransactionFlow: React.FC = (): JSX.Element => {
   const [address, setAddress] = useState('');
   const [queryParams, setQueryParams] = useState<IQueryParams>({
     inboundDepth: 1,
@@ -30,6 +30,14 @@ const GraphInputs: React.FC = () => {
   });
 
   const [search, setSearch] = useState(false);
+
+  const validateAddressAndSearch = () => {
+    address && address !== '' ? setSearch(true) : Modal.error(
+      {
+        title: 'Error: No Address Entered',
+        content: 'No address was entered, please enter a valid address and try again.'
+      });
+  };
 
   return (
     <div className="h-screen">
@@ -45,25 +53,25 @@ const GraphInputs: React.FC = () => {
           <DateRangePicker queryParams={queryParams} setQueryParams={setQueryParams} />
           <Input
             onChange={(e) => {
-              setAddress(e.target.value);
+              setAddress(e.target.value.trim());
               setQueryParams({ ...queryParams, address: e.target.value });
             }}
             style={{ width: '500px' }}
-            onPressEnter={() => setSearch(true)}
+            onPressEnter={validateAddressAndSearch}
             placeholder="Enter an address"
           />
           <Button
             style={{ backgroundColor: "#18181b", color: "#ffffff" }}
-            onClick={() => setSearch(true)}>
+            onClick={validateAddressAndSearch}>
             Search
           </Button>
         </Row>
       </div>
       <ReactFlowProvider>
-        <Graph address={address} search={search} setSearch={setSearch} queryParams={queryParams} />
+        <TransactionFlowGraph address={address} search={search} setSearch={setSearch} queryParams={queryParams} />
       </ReactFlowProvider>
     </div>
   );
 };
 
-export default GraphInputs;
+export default TransactionFlow;

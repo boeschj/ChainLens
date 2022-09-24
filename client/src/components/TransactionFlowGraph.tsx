@@ -1,12 +1,13 @@
 import ReactFlow, { Controls, useEdgesState, useNodesState, Node } from "react-flow-renderer";
 import { LoadingOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { client } from "./gql/apolloClient";
-import { TRANSACTION_FLOW_ETHEREUM } from "./gql/queries/transactionFlow_Ethereum";
-import { IQueryParams } from "./graphInputs";
-import { mapDataToHierarchyLayout } from "./graphUtils/buildGraphLayout";
-import { getReactFlowNodesAndEdges } from "./graphUtils/buildNodesAndEdges";
-import { TreeNode } from "./graphUtils/TreeNode";
+import { client } from "../gql/apolloClient";
+import { TRANSACTION_FLOW_ETHEREUM } from "../gql/queries/transactionFlow_Ethereum";
+import { IQueryParams } from "../pages/TransactionFlow";
+import { mapDataToHierarchyLayout } from "../graphUtils/buildGraphLayout";
+import { getReactFlowNodesAndEdges } from "../graphUtils/buildNodesAndEdges";
+import { TreeNode } from "../graphUtils/TreeNode";
+import { Modal } from "antd";
 
 interface IGraphInputs {
   address: string,
@@ -17,38 +18,17 @@ interface IGraphInputs {
 
 const map: Map<string, TreeNode<any>> = new Map();
 
-const Graph: React.FC<IGraphInputs> = ({ address, search, setSearch, queryParams }: IGraphInputs): JSX.Element => {
+const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSearch, queryParams }: IGraphInputs): JSX.Element => {
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
-
   const [rootData, setRootData] = useState(
     new TreeNode<any>(
       map,
-      {
-        address: '',
-        contractType: '',
-        name: '',
-        symbol: '',
-      },
+      {},
       ''
     )
   );
-
-  const getTransactionData = async (inputAddress: string) => {
-
-    const response = await client.query({
-      query: TRANSACTION_FLOW_ETHEREUM,
-      variables: {
-        ...queryParams,
-        address: inputAddress
-      }
-    });
-
-    return response.data ?? {
-      transactionFlow: { inbound: new Array<any>(), outbound: new Array<any>() }
-    };
-  }
 
   useEffect(() => {
     if (search) {
@@ -58,13 +38,52 @@ const Graph: React.FC<IGraphInputs> = ({ address, search, setSearch, queryParams
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  const getTransactionData = async (inputAddress: string) => {
+    try {
+
+      const response = await client.query({
+        query: TRANSACTION_FLOW_ETHEREUM,
+        variables: {
+          ...queryParams,
+          address: inputAddress
+        }
+      });
+
+      console.log(response);
+
+      if (response.data.transactionFlow.inbound === null && response.data.transactionFlow.outbound === null) {
+        setLoading(false);
+        throw new Error("No transactions were found for this address. Please adjust your parameters and try again.");
+      }
+
+      return response.data;
+
+    } catch (e: any) {
+      Modal.error({
+        title: "Error",
+        content: e.message
+      })
+      setRootData(
+        new TreeNode<any>(
+          map,
+          {},
+          ''
+        )
+      );
+      setNodes([]);
+      setEdges([]);
+      setLoading(false);
+      throw new Error();
+    }
+  }
+
   const setGraphLayout = async (inputAddress: string, setRoot: boolean = false) => {
     setLoading(true);
-    const initialRootData = new TreeNode(map, { address: address, contractType: '', name: '', symbol: '' }, address);
+    const initialRootData = new TreeNode(map, {}, address);
     setRoot ? setRootData(initialRootData) : setRootData(rootData);
 
     const transactionFlowData = await getTransactionData(inputAddress);
-    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map);
+    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData.transactionFlow, setRoot, initialRootData, rootData, map);
 
     const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
     setNodes(initialElements.nodes);
@@ -99,4 +118,4 @@ const Graph: React.FC<IGraphInputs> = ({ address, search, setSearch, queryParams
   );
 };
 
-export default Graph;
+export default TransactionFlowGraph;

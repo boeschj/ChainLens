@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
-import TransactionFlow from './transactionFlow';
+import TransactionFlow from './pages/TransactionFlow';
 
-function App() {
+const Router = () => {
   return (
     <Routes>
       <Route path={'/'} element={<TransactionFlow />} />
@@ -9,4 +9,4 @@ function App() {
   );
 }
 
-export default App;
+export default Router;

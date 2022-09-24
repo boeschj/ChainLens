@@ -1,7 +1,7 @@
 import { Space } from "antd";
 import DatePicker, { RangePickerProps } from "antd/lib/date-picker";
 import moment from "moment";
-import { IQueryParams } from "../graphInputs";
+import { IQueryParams } from "../pages/TransactionFlow";
 const { RangePicker } = DatePicker;
 
 interface IDateRangePicker {

@@ -1,5 +1,5 @@
 import { Input, Select } from "antd"
-import { IQueryParams } from "../graphInputs";
+import { IQueryParams } from "../pages/TransactionFlow";
 const { Option } = Select;
 
 interface IDropdownListSelect {

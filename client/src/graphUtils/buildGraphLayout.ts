@@ -8,8 +8,10 @@ export const mapDataToHierarchyLayout = (address: string, transactionFlowData: a
 
     const addressTreeNode = map.get(address)!;
 
+    console.log('txflowdata map data', transactionFlowData);
+
     addressTreeNode.addOutgoings(
-        transactionFlowData.transactionFlow.outbound.map((transaction: any) => {
+        transactionFlowData.outbound.map((transaction: any) => {
             return new TreeNode(map, {
                 data: transaction
             }, transaction.receiver.address)
@@ -17,7 +19,7 @@ export const mapDataToHierarchyLayout = (address: string, transactionFlowData: a
     );
 
     addressTreeNode.addIncomings(
-        transactionFlowData.transactionFlow.inbound.map((transaction: any) => {
+        transactionFlowData.inbound.map((transaction: any) => {
             return new TreeNode(map, {
                 data: transaction
             }, transaction.sender.address)
