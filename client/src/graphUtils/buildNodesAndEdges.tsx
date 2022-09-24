@@ -12,7 +12,6 @@ import { MarkerType } from 'react-flow-renderer';
 
 const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean) => {
 
-    console.log('nodedata,', nodeData);
     //TODO: add balance and transaction history details for tooltip
     // const data = nodeData.data.data.data;
 
@@ -54,14 +53,12 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
         },
         position: { x: (incoming ? -1 : 1) * nodeData.y, y: nodeData.x },
         style: nodeStyle,
-        sourcePosition: Position.Bottom,
+        sourcePosition: Position.Right,
         targetPosition: Position.Left,
     }
 }
 
 const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean) => {
-
-    console.log('edgeData', edgeData);
 
     const recipient = edgeData.target.data.id;
     const sender = edgeData.source.data.id;
@@ -112,14 +109,14 @@ export const getReactFlowNodesAndEdges = (
     [nodesIncoming, nodesOutgoing].forEach((value, index) => {
         const incoming: boolean = index === 0;
 
-        for (const d of value.descendants()) {
-            if (seen.get(d.data.id) !== undefined) continue;
-            nodes.push(newNode(d, incoming));
-            seen.set(d.data.id, '');
+        for (const address of value.descendants()) {
+            if (seen.get(address.data.id) !== undefined) continue;
+            nodes.push(newNode(address, incoming));
+            seen.set(address.data.id, '');
         }
 
-        value.links().forEach((d) => {
-            edges.push(newEdge(d, incoming));
+        value.links().forEach((transaction) => {
+            edges.push(newEdge(transaction, incoming));
         }
         );
     });
