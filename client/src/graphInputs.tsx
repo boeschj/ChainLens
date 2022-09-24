@@ -2,19 +2,16 @@ import React, { useState } from 'react';
 import blocktraceLogo from './assets/blocktraceLogo.png';
 import { hierarchy, tree } from 'd3-hierarchy';
 import {
-  Node,
   ReactFlowProvider,
 } from 'react-flow-renderer';
 import { Button, DatePicker, Input, Row, Select, Space } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
 import { client } from './gql/apolloClient';
-import { TRANSACTION_FLOW_IN_OUT } from './gql/queries/transactionFlowInAndOut';
 import { TreeNode } from './graphUtils/TreeNode';
-import { getReactFlowNodesAndEdges } from './graphUtils/buildElements';
 import moment from 'moment';
 import { RangePickerProps } from 'antd/lib/date-picker';
 import Graph from './graph';
 import { TRANSACTION_FLOW_ETHEREUM } from './gql/queries/transactionFlow_Ethereum';
+import { getReactFlowNodesAndEdges } from './graphUtils/buildNodesAndEdges';
 const { Option } = Select;
 
 
@@ -57,99 +54,57 @@ const GraphInputs: React.FC = () => {
     )
   );
 
-  // const nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
-  // const nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-  // getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
+  const getTransactionData = async (inputAddress: string) => {
 
-  const antIcon = <LoadingOutlined style={{ fontSize: 200 }} spin />;
-
-  const handleNodeClick = async (_: any, node: Node) => {
-    if (loading) return;
-
-    setLoading(true);
     const response = await client.query({
       query: TRANSACTION_FLOW_ETHEREUM,
       variables: {
         ...queryParams,
-        inboundDepth: 1,
-        outboundDepth: 1,
-        address: node.id
-      }
-    });
-    console.log(response);
-    const transactionFlowData = response.data ?? {
-      transactionFlow: { inbound: new Array<any>(), outbound: new Array<any>() }
-    };
-
-    const treeNode = map.get(node.id)!;
-    treeNode.addIncomings(
-      transactionFlowData.transactionFlow.inbound.map((d: any) => {
-        let data = {
-          sender: d.sender,
-          amount: d.amount,
-          symbol: d.symbol
-        }
-        return new TreeNode(map, data, d.sender.address)
-      })
-    );
-    treeNode.addOutgoings(
-      transactionFlowData.transactionFlow.outbound.map((d: any) => {
-        let data = {
-          receiver: d.receiver,
-          amount: d.amount,
-          symbol: d.symbol
-        }
-        return new TreeNode(map, data, d.receiver.address)
-      })
-    );
-
-    const nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
-    const nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
-    const elements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
-
-    setNodes(elements.nodes);
-    setEdges(elements.edges);
-    setLoading(false);
-  };
-
-  const setTreeRoot = async () => {
-    const rootData = new TreeNode(map, { address: address, contractType: '', name: '', symbol: '' }, address);
-    setRootData(rootData);
-
-    const response = await client.query({
-      query: TRANSACTION_FLOW_ETHEREUM,
-      variables: {
-        ...queryParams
+        address: inputAddress
       }
     });
 
-    const transactionFlowData = response.data ?? {
+    return response.data ?? {
       transactionFlow: { inbound: new Array<any>(), outbound: new Array<any>() }
     };
+  }
 
-    const treeNode = map.get(address)!;
+  const mapDataToTreeNodes = async (inputAddress: string) => {
+    const treeNode = map.get(inputAddress)!;
+
+    const transactionFlowData = await getTransactionData(inputAddress);
     treeNode.addOutgoings(
-      transactionFlowData.transactionFlow.outbound.map((d: any) => {
+      transactionFlowData.transactionFlow.outbound.map((transaction: any) => {
         return new TreeNode(map, {
-          data: d
-        }, d.receiver.address)
+          data: transaction
+        }, transaction.receiver.address)
       })
     );
 
     treeNode.addIncomings(
-      transactionFlowData.transactionFlow.inbound.map((d: any) => {
+      transactionFlowData.transactionFlow.inbound.map((transaction: any) => {
         return new TreeNode(map, {
-          data: d
-        }, d.sender.address)
+          data: transaction
+        }, transaction.sender.address)
       })
     );
+  }
 
-    const nodesIncoming = layout(hierarchy(rootData, (d: any) => d.incoming));
-    const nodesOutgoing = layout(hierarchy(rootData, (d: any) => d.outgoing));
+
+  const setTreeRoot = async (inputAddress: string, setRoot: boolean = false) => {
+    setLoading(true);
+    const initialRootData = new TreeNode(map, { address: address, contractType: '', name: '', symbol: '' }, address);
+    setRoot ? setRootData(initialRootData) : setRootData(rootData);
+
+    await mapDataToTreeNodes(inputAddress);
+
+    const nodesIncoming = layout(hierarchy(setRoot ? initialRootData : rootData, (transaction: any) => transaction.incoming));
+    const nodesOutgoing = layout(hierarchy(setRoot ? initialRootData : rootData, (transaction: any) => transaction.outgoing));
     const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
 
     setNodes(initialElements.nodes);
     setEdges(initialElements.edges);
+    setLoading(false);
   }
 
   const { RangePicker } = DatePicker;
@@ -197,20 +152,20 @@ const GraphInputs: React.FC = () => {
               setQueryParams({ ...queryParams, address: e.target.value });
             }}
             style={{ width: '500px' }}
-            onPressEnter={setTreeRoot}
+            onPressEnter={() => setTreeRoot(address, true)}
             placeholder="Enter an address"
           />
 
           <Button
             style={{ backgroundColor: "#18181b", color: "#ffffff" }}
-            onClick={setTreeRoot}>
+            onClick={() => setTreeRoot(address, true)}>
             Search
           </Button>
 
         </Row>
       </div>
       <ReactFlowProvider>
-        <Graph nodes={nodes} edges={edges} handleNodeClick={handleNodeClick} />
+        <Graph nodes={nodes} edges={edges} setTreeRoot={setTreeRoot} loading={loading} />
       </ReactFlowProvider>
     </div>
   );

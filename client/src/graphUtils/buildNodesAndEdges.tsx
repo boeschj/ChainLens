@@ -13,7 +13,8 @@ import { MarkerType } from 'react-flow-renderer';
 const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean) => {
 
     console.log('nodedata,', nodeData);
-    const data = nodeData.data.data.data;
+    //TODO: add balance and transaction history details for tooltip
+    // const data = nodeData.data.data.data;
 
     const addrSubstring: string = `${nodeData.data.id.substring(0, 8)}...${nodeData.data.id.substring(
         nodeData.data.id.length - 8,
@@ -53,15 +54,23 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
         },
         position: { x: (incoming ? -1 : 1) * nodeData.y, y: nodeData.x },
         style: nodeStyle,
-        sourcePosition: Position.Right,
+        sourcePosition: Position.Bottom,
         targetPosition: Position.Left,
     }
 }
 
 const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean) => {
-    const targetEdgeAddress = edgeData.target.data.id;
-    const sourceEdgeAddress = edgeData.source.data.id;
+
+    console.log('edgeData', edgeData);
+
+    const recipient = edgeData.target.data.id;
+    const sender = edgeData.source.data.id;
+    const edgeSourceAddress = incoming ? recipient : sender;
+    const edgeTargetAddress = incoming ? sender : recipient;
     const data = edgeData.target.data.data.data;
+    const transactionHash = data.transaction.hash;
+    const currencyAmount = data.amount.toPrecision(5);
+    const currencySymbol = data.currency.symbol;
 
     const labelStyle = {
         fontSize: '20px'
@@ -74,11 +83,11 @@ const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean)
 
     return (
         {
-            id: `${data.transaction.hash}-${incoming ? targetEdgeAddress : sourceEdgeAddress}->${incoming ? sourceEdgeAddress : targetEdgeAddress}`,
-            source: incoming ? targetEdgeAddress : sourceEdgeAddress,
-            target: incoming ? sourceEdgeAddress : targetEdgeAddress,
-            label: `${data.amount.toPrecision(5)
-                } ${data.currency.symbol}`,
+            id: `${transactionHash}-${edgeSourceAddress}->${edgeTargetAddress}`,
+            source: edgeSourceAddress,
+            target: edgeTargetAddress,
+            label: `${currencyAmount
+                } ${currencySymbol}`,
             labelStyle: labelStyle,
             style: arrowStyle,
             markerEnd: { type: MarkerType.ArrowClosed },
