@@ -1,4 +1,5 @@
-export const TRANSACTION_FLOW_QUERY = `query ($network: EthereumNetwork!, $address: String!, $inboundDepth: Int!, $outboundDepth: Int!, $from: ISO8601DateTime, $till: ISO8601DateTime) 
+export const ETH_TRANSACTION_FLOW_QUERY =
+  `query ($network: EthereumNetwork!, $address: String!, $inboundDepth: Int!, $outboundDepth: Int!, $from: ISO8601DateTime, $till: ISO8601DateTime) 
 {
   ethereum(network: $network) 
   {

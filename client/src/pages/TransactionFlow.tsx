@@ -8,10 +8,12 @@ import moment from 'moment';
 import TransactionFlowGraph from '../components/TransactionFlowGraph';
 import DateRangePicker from '../components/DateRangePicker';
 import DropdownListSelect from '../components/DropdownListSelect';
+import { BitqueryNetworksEnum } from '../constants/BitqueryNetworksEnum';
 
 export interface IQueryParams {
   inboundDepth: number,
   outboundDepth: number,
+  network: string,
   address: string,
   currency: string,
   from: string,
@@ -23,6 +25,7 @@ const TransactionFlow: React.FC = (): JSX.Element => {
   const [queryParams, setQueryParams] = useState<IQueryParams>({
     inboundDepth: 1,
     outboundDepth: 1,
+    network: BitqueryNetworksEnum.EthMainnet,
     address: '',
     currency: 'ETH',
     from: moment().startOf('week').toISOString(),
@@ -58,7 +61,7 @@ const TransactionFlow: React.FC = (): JSX.Element => {
             }}
             style={{ width: '500px' }}
             onPressEnter={validateAddressAndSearch}
-            placeholder="Enter an address"
+            placeholder="Enter a wallet or smart contract address"
           />
           <Button
             style={{ backgroundColor: "#18181b", color: "#ffffff" }}

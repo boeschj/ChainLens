@@ -5,13 +5,14 @@ export const TRANSACTION_FLOW_ETHEREUM = gql`
   $address: String!
   $inboundDepth: Float!
   $outboundDepth: Float!
+  $network: String!
   $from: String!
   $till: String!
 ) {
   transactionFlow(
     inboundDepth: $inboundDepth
     outboundDepth: $outboundDepth
-    network: "ethereum"
+    network: $network
     address: $address
     from: $from
     till: $till

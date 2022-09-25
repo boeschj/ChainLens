@@ -8,6 +8,7 @@ import { mapDataToHierarchyLayout } from "../graphUtils/buildGraphLayout";
 import { getReactFlowNodesAndEdges } from "../graphUtils/buildNodesAndEdges";
 import { TreeNode } from "../graphUtils/TreeNode";
 import { Modal } from "antd";
+import { NetworkToQueryMappings } from "../constants/BitqueryNetworksEnum";
 
 interface IGraphInputs {
   address: string,
@@ -42,7 +43,7 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     try {
 
       const response = await client.query({
-        query: TRANSACTION_FLOW_ETHEREUM,
+        query: NetworkToQueryMappings.get(queryParams.network)!,
         variables: {
           ...queryParams,
           address: inputAddress
@@ -51,7 +52,7 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
 
       console.log(response);
 
-      if (response.data.transactionFlow.inbound === null && response.data.transactionFlow.outbound === null) {
+      if ((response.data.transactionFlow.inbound === null || response.data.transactionFlow.inbound.length === 0) && (response.data.transactionFlow.outbound === null || response.data.transactionFlow.outbound.length === 0)) {
         setLoading(false);
         throw new Error("No transactions were found for this address. Please adjust your parameters and try again.");
       }

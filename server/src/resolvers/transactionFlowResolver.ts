@@ -1,21 +1,21 @@
 import { Args, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import { Transactions } from '../types/transactionFlow/transactions';
 import {
-  getTransactionFlowData
+  getETHTransactionFlowData
 } from '../sources/bitquery/controllers/transactionFlowController';
 import { TransactionFlowArgs } from '../args/transactionFlow.args';
+import { EthereumTransactions } from '../types/transactionFlow/ethereum/ethereumTransactions';
 
 @Service()
-@Resolver(Transactions)
+@Resolver(EthereumTransactions)
 export class TransactionFlowResolver {
-  @Query(() => Transactions, {
-    description: 'Retrieves the flow of funds to and from a given address'
+  @Query(() => EthereumTransactions, {
+    description: 'Retrieves the flow of funds to and from a given address on an Ethereum related network'
   })
-  public async transactionFlow(
+  public async EthereumTransactionFlow(
     @Args() transactionFlowArgs: TransactionFlowArgs
-  ): Promise<Transactions> {
-    const transactionFlow: Transactions = await getTransactionFlowData(transactionFlowArgs);
+  ): Promise<EthereumTransactions> {
+    const transactionFlow: EthereumTransactions = await getETHTransactionFlowData(transactionFlowArgs);
 
     return transactionFlow;
   }

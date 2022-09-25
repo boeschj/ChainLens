@@ -1,7 +1,7 @@
 import { Field, ObjectType } from 'type-graphql';
 
 @ObjectType({ description: "The recipient of a transaction" })
-export class Receiver {
+export class EthereumReceiver {
     @Field(() => String, { description: 'The address of the transaction recipient' })
     public address!: string;
     @Field(() =>

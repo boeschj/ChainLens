@@ -1,11 +1,11 @@
 import { Field, ObjectType } from 'type-graphql';
-import { Currency } from './currency';
-import { Receiver } from './receiver';
-import { Sender } from './sender';
-import { Transaction } from './transaction';
+import { EthereumCurrency } from './ethereumCurrency';
+import { EthereumReceiver } from './ethereumReceiver';
+import { EthereumSender } from './ethereumSender';
+import { EthereumTransaction } from './ethereumTransaction';
 
 @ObjectType({ description: "Transaction details of an incoming transaction from a given address" })
-export class Inbound {
+export class EthereumInbound {
     @Field(() =>
         Number
         , { description: 'The amount of currency being sent' })
@@ -15,19 +15,19 @@ export class Inbound {
         , { description: 'The number of transactions made away from the target address' })
     public depth!: number;
     @Field(() =>
-        Transaction
+        EthereumTransaction
         , { description: 'Details on the transaction occurring' })
-    public transaction!: Transaction;
+    public transaction!: EthereumTransaction;
     @Field(() =>
-        Currency
+        EthereumCurrency
         , { description: 'The type of currency being sent' })
-    public currency!: Currency;
+    public currency!: EthereumCurrency;
     @Field(() =>
-        Receiver
+        EthereumReceiver
         , { description: 'The recieving counterparty in the transaction' })
-    public receiver!: Receiver;
+    public receiver!: EthereumReceiver;
     @Field(() =>
-        Sender
+        EthereumSender
         , { description: 'The sending counterparty in the transaction' })
-    public sender!: Sender;
+    public sender!: EthereumSender;
 }

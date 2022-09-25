@@ -6,13 +6,15 @@ import { ServerResolver } from './resolvers/serverResolver';
 import { TransactionFlowResolver } from './resolvers/transactionFlowResolver';
 import { Container } from 'typedi';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
+import { LegacyTransactionFlowResolver } from './resolvers/legacyTransactionFlowResolver';
 
 export const buildGqlSchema = (): GraphQLSchema => {
 
     return buildSchemaSync({
         resolvers: [
             ServerResolver,
-            TransactionFlowResolver
+            TransactionFlowResolver,
+            LegacyTransactionFlowResolver
         ],
         container: Container,
         dateScalarMode: 'isoDate',
