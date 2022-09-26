@@ -4,7 +4,6 @@ import {
   getLegacyTransactionFlowData,
 } from '../sources/bitquery/controllers/transactionFlowController';
 import { TransactionFlowArgs } from '../args/transactionFlow.args';
-import { BitcoinTransactionFlow } from '../types/transactionFlow/bitcoin/bitcoinTransactionFlow';
 import { BitcoinTransactions } from '../types/transactionFlow/bitcoin/bitcoinTransactions';
 
 @Service()
@@ -16,7 +15,7 @@ export class LegacyTransactionFlowResolver {
   public async LegacyTransactionFlow(
     @Args() transactionFlowArgs: TransactionFlowArgs
   ): Promise<BitcoinTransactions> {
-    const transactionFlow: BitcoinTransactionFlow = await getLegacyTransactionFlowData(transactionFlowArgs);
-    return transactionFlow.bitcoin;
+    const transactionFlow: BitcoinTransactions = await getLegacyTransactionFlowData(transactionFlowArgs);
+    return transactionFlow;
   }
 }

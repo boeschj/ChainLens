@@ -16,7 +16,6 @@ export class TransactionFlowResolver {
     @Args() transactionFlowArgs: TransactionFlowArgs
   ): Promise<EthereumTransactions> {
     const transactionFlow: EthereumTransactions = await getETHTransactionFlowData(transactionFlowArgs);
-
     return transactionFlow;
   }
 }

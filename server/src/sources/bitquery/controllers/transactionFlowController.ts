@@ -1,4 +1,3 @@
-import { BitcoinTransactionFlow } from '../../../types/transactionFlow/bitcoin/bitcoinTransactionFlow';
 import { TransactionFlowArgs } from './../../../args/transactionFlow.args';
 import { bitqueryAxiosInstance } from '../config';
 import { ETH_TRANSACTION_FLOW_QUERY } from '../queries/ETH_TransactionFlowQuery';
@@ -13,13 +12,7 @@ export async function getETHTransactionFlowData(transactionFlowArgs: Transaction
       .post('', {
         query: ETH_TRANSACTION_FLOW_QUERY,
         variables: {
-          inboundDepth: transactionFlowArgs.inboundDepth,
-          outboundDepth: transactionFlowArgs.outboundDepth,
-          network: transactionFlowArgs.network,
-          address: transactionFlowArgs.address,
-          currency: transactionFlowArgs.currency,
-          from: transactionFlowArgs.from,
-          till: transactionFlowArgs.till
+          ...transactionFlowArgs
         }
       })
       .then(
@@ -36,25 +29,19 @@ export async function getETHTransactionFlowData(transactionFlowArgs: Transaction
   return responseData!;
 }
 
-export async function getLegacyTransactionFlowData(transactionFlowArgs: TransactionFlowArgs): Promise<BitcoinTransactionFlow> {
-  let responseData: BitcoinTransactionFlow;
+export async function getLegacyTransactionFlowData(transactionFlowArgs: TransactionFlowArgs): Promise<BitcoinTransactions> {
+  let responseData: BitcoinTransactions;
   try {
     await bitqueryAxiosInstance
       .post('', {
         query: BTC_TRANSACTION_FLOW_QUERY,
         variables: {
-          inboundDepth: transactionFlowArgs.inboundDepth,
-          outboundDepth: transactionFlowArgs.outboundDepth,
-          network: transactionFlowArgs.network,
-          address: transactionFlowArgs.address,
-          currency: transactionFlowArgs.currency,
-          from: transactionFlowArgs.from,
-          till: transactionFlowArgs.till
+          ...transactionFlowArgs
         }
       })
       .then(
         (response: any) => {
-          responseData = response.data.data as BitcoinTransactionFlow;
+          responseData = response.data.data.bitcoin as BitcoinTransactions;
         },
         (onRejected: any) => {
           console.error('Error in bitquery/controller/getBTCTransactionFlowData', transactionFlowArgs, onRejected);

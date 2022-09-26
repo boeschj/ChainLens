@@ -1,5 +1,6 @@
 import { DocumentNode } from "graphql";
 import { TRANSACTION_FLOW_ETHEREUM } from "../gql/queries/transactionFlow_Ethereum";
+import { TRANSACTION_FLOW_LEGACY } from "../gql/queries/transactionFlow_Legacy";
 
 export enum BitqueryNetworksEnum {
     //Ethereum
@@ -13,7 +14,7 @@ export enum BitqueryNetworksEnum {
     litecoin = 'litecoin',
     dash = 'dash',
     dogecoin = 'dogecoin',
-    zcash = 'zcash'
+    zcash = 'zcash',
 };
 
 export const NetworkToBitqueryEnumMappings = new Map<string, BitqueryNetworksEnum>([
@@ -34,4 +35,10 @@ export const NetworkToQueryMappings = new Map<string, DocumentNode>([
     [BitqueryNetworksEnum.goerli, TRANSACTION_FLOW_ETHEREUM],
     [BitqueryNetworksEnum.polygonMainnet, TRANSACTION_FLOW_ETHEREUM],
     [BitqueryNetworksEnum.bscMainnet, TRANSACTION_FLOW_ETHEREUM],
+    [BitqueryNetworksEnum.bitcoin, TRANSACTION_FLOW_LEGACY],
+    [BitqueryNetworksEnum.bitcoinCash, TRANSACTION_FLOW_LEGACY],
+    [BitqueryNetworksEnum.litecoin, TRANSACTION_FLOW_LEGACY],
+    [BitqueryNetworksEnum.dash, TRANSACTION_FLOW_LEGACY],
+    [BitqueryNetworksEnum.dogecoin, TRANSACTION_FLOW_LEGACY],
+    [BitqueryNetworksEnum.zcash, TRANSACTION_FLOW_LEGACY],
 ])
