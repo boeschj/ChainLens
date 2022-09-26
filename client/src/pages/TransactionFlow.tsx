@@ -61,7 +61,7 @@ const TransactionFlow: React.FC = (): JSX.Element => {
             }}
             style={{ width: '500px' }}
             onPressEnter={validateAddressAndSearch}
-            placeholder="Enter a wallet or smart contract address"
+            placeholder="Search for any wallet or smart contract address"
           />
           <Button
             style={{ backgroundColor: "#18181b", color: "#ffffff" }}
