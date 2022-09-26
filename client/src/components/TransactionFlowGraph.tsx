@@ -52,12 +52,18 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
 
       console.log(response);
 
-      if ((response.data.transactionFlow.inbound === null || response.data.transactionFlow.inbound.length === 0) && (response.data.transactionFlow.outbound === null || response.data.transactionFlow.outbound.length === 0)) {
+      if (response.data.EthereumTransactionFlow) {
+        return response.data.EthereumTransactionFlow;
+      }
+
+      if (response.data.LegacyTransactionFlow) {
+        return response.data.LegacyTransactionFlow;
+      }
+
+      if (!response.data.EthereumTransactionFlow && !response.data.LegacyTransactionFlow) {
         setLoading(false);
         throw new Error("No transactions were found for this address. Please adjust your parameters and try again.");
       }
-
-      return response.data;
 
     } catch (e: any) {
       Modal.error({
@@ -84,7 +90,7 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     setRoot ? setRootData(initialRootData) : setRootData(rootData);
 
     const transactionFlowData = await getTransactionData(inputAddress);
-    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData.transactionFlow, setRoot, initialRootData, rootData, map);
+    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map);
 
     const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
     setNodes(initialElements.nodes);

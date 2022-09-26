@@ -66,8 +66,8 @@ const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean)
     const edgeTargetAddress = incoming ? sender : recipient;
     const data = edgeData.target.data.data.data;
     const transactionHash = data.transaction.hash;
-    const currencyAmount = data.amount.toPrecision(5);
-    const currencySymbol = data.currency.symbol;
+    const currencyAmount = data.amount.toPrecision(5) ?? '';
+    const currencySymbol = data?.currency?.symbol ?? 'BTC'; //TODO: Handle this properly, as multiple edge cases could now result with incorrect BTC tag
 
     const labelStyle = {
         fontSize: '20px'

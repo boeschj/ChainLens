@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const TRANSACTION_FLOW_ETHEREUM = gql`
-  query transactionFlow(
+  query EthereumTransactionFlow(
   $address: String!
   $inboundDepth: Float!
   $outboundDepth: Float!
@@ -9,7 +9,7 @@ export const TRANSACTION_FLOW_ETHEREUM = gql`
   $from: String!
   $till: String!
 ) {
-  transactionFlow(
+  EthereumTransactionFlow(
     inboundDepth: $inboundDepth
     outboundDepth: $outboundDepth
     network: $network
