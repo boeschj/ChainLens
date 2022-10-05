@@ -8,8 +8,6 @@ export const mapDataToHierarchyLayout = (address: string, transactionFlowData: a
 
     const addressTreeNode = map.get(address)!;
 
-    console.log('txflowdata map data', transactionFlowData);
-
     addressTreeNode.addOutgoings(
         transactionFlowData.outbound.map((transaction: any) => {
             return new TreeNode(map, {

@@ -20,7 +20,7 @@ const DropdownListSelect: React.FC<IDropdownListSelect> = ({ queryParams, setQue
             </Select>
             <Select onChange={(value) => setQueryParams({ ...queryParams, currency: value })} defaultValue="All" style={{ width: '75px' }}>
                 <Option value="All">All</Option>
-                <Option value="ETH">ETH</Option>
+                {/* <Option value="ETH">ETH</Option> */}
             </Select>
         </Input.Group>
     );
