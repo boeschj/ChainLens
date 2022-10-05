@@ -1,24 +1,14 @@
 import { gql } from '@apollo/client';
 
 export const TRANSACTION_FLOW_LEGACY = gql`
-  query transactionFlow(
-  $address: String!
-  $network: String!
-  $inboundDepth: Float!
-  $outboundDepth: Float!
-  $from: String
-  $till: String!
-) {
-  LegacyTransactionFlow(
-    inboundDepth: $inboundDepth
-    outboundDepth: $outboundDepth
-    network: $network
-    address: $address
-    from: $from
-    till: $till
-  ) {
-    inbound {
-      amount
+query ($network: BitcoinNetwork!, $address: String!, $inboundDepth: Int!, $outboundDepth: Int!, $from: ISO8601DateTime, $till: ISO8601DateTime) {
+  bitcoin(network: $network) {
+    inbound: coinpath(
+      initialAddress: {is: $address}
+      depth: {lteq: $inboundDepth}
+      options: {direction: inbound, asc: "depth", desc: "amount", limitBy: {each: "depth", limit: 10}}
+      date: {since: $from, till: $till}
+    ) {
       sender {
         address
         annotation
@@ -27,12 +17,18 @@ export const TRANSACTION_FLOW_LEGACY = gql`
         address
         annotation
       }
+      amount
+      depth
       transaction {
         hash
       }
     }
-    outbound {
-      amount
+    outbound: coinpath(
+      initialAddress: {is: $address}
+      depth: {lteq: $outboundDepth}
+      options: {asc: "depth", desc: "amount", limitBy: {each: "depth", limit: 10}}
+      date: {since: $from, till: $till}
+    ) {
       sender {
         address
         annotation
@@ -41,6 +37,8 @@ export const TRANSACTION_FLOW_LEGACY = gql`
         address
         annotation
       }
+      amount
+      depth
       transaction {
         hash
       }

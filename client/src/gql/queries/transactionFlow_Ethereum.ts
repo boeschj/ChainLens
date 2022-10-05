@@ -1,35 +1,16 @@
 import { gql } from '@apollo/client';
 
 export const TRANSACTION_FLOW_ETHEREUM = gql`
-  query EthereumTransactionFlow(
-  $address: String!
-  $inboundDepth: Float!
-  $outboundDepth: Float!
-  $network: String!
-  $from: String!
-  $till: String!
-) {
-  EthereumTransactionFlow(
-    inboundDepth: $inboundDepth
-    outboundDepth: $outboundDepth
-    network: $network
-    address: $address
-    from: $from
-    till: $till
-  ) {
-    inbound {
-      amount
-      depth
-      transaction {
-        hash
-        time {
-          iso8601
-        }
-      }
-      currency {
-        symbol
-        address
-      }
+  query ($network: EthereumNetwork!, $address: String!, $inboundDepth: Int!, $outboundDepth: Int!, $from: ISO8601DateTime, $till: ISO8601DateTime) 
+{
+  ethereum(network: $network) 
+  {
+    inbound: coinpath(
+      initialAddress: {is: $address}
+      depth: {lteq: $inboundDepth}
+      options: {direction: inbound, asc: "depth", desc: "amount", limitBy: {each: "depth", limit: 10}, limit: 50}
+      date: {since: $from, till: $till}
+    ) {
       sender {
         address
         annotation
@@ -37,21 +18,27 @@ export const TRANSACTION_FLOW_ETHEREUM = gql`
       receiver {
         address
         annotation
+      }
+      amount
+      currency {
+        symbol
+        address
+      }
+      depth
+      transaction {
+        hash
+        time {
+          iso8601
+        }
       }
     }
-    outbound {
-      amount
-      depth
-      transaction {
-        hash
-        time {
-          iso8601
-        }
-      }
-      currency {
-        symbol
-        address
-      }
+    outbound: coinpath(
+      initialAddress: {is: $address}
+      depth: {lteq: $outboundDepth}
+      options: {direction: outbound, asc: "depth", desc: "amount", limitBy: {each: "depth", limit: 10}, limit: 50}
+      date: {since: $from, till: $till}
+    ) 
+    {
       sender {
         address
         annotation
@@ -59,6 +46,18 @@ export const TRANSACTION_FLOW_ETHEREUM = gql`
       receiver {
         address
         annotation
+      }
+      amount
+      currency {
+        symbol
+        address
+      }
+      depth
+      transaction {
+        hash
+        time {
+          iso8601
+        }
       }
     }
   }
