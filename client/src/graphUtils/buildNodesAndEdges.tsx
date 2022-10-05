@@ -22,12 +22,14 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
 
     const labelContent: JSX.Element = (
         <div>
-            <div>
-                {' '}
-                {nodeData.data.data.annotation !== undefined && nodeData.data.data.annotation.length > 0
-                    ? nodeData.data.data.annotation
-                    : addrSubstring}{' '}
-            </div>{' '}
+            <Tooltip
+                overlay={<div className="underline text-sm">{nodeData.data.id}</div>} color={'#404040'}>
+                <div>
+                    {nodeData.data.data.annotation !== undefined && nodeData.data.data.annotation.length > 0
+                        ? nodeData.data.data.annotation
+                        : addrSubstring}{' '}
+                </div>
+            </Tooltip>
             <Tooltip title={'Double click a node to retrieve more transactions.'} color={'#404040'}>
                 <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
             </Tooltip>{' '}
