@@ -42,3 +42,16 @@ export const NetworkToQueryMappings = new Map<string, DocumentNode>([
     [BitqueryNetworksEnum.dogecoin, TRANSACTION_FLOW_LEGACY],
     [BitqueryNetworksEnum.zcash, TRANSACTION_FLOW_LEGACY],
 ])
+
+export const NetworkToExplorerMappings = new Map<string, DocumentNode>([
+        [BitqueryNetworksEnum.EthMainnet, TRANSACTION_FLOW_ETHEREUM],
+        [BitqueryNetworksEnum.goerli, TRANSACTION_FLOW_ETHEREUM],
+        [BitqueryNetworksEnum.polygonMainnet, TRANSACTION_FLOW_ETHEREUM],
+        [BitqueryNetworksEnum.bscMainnet, TRANSACTION_FLOW_ETHEREUM],
+        [BitqueryNetworksEnum.bitcoin, TRANSACTION_FLOW_LEGACY],
+        [BitqueryNetworksEnum.bitcoinCash, TRANSACTION_FLOW_LEGACY],
+        [BitqueryNetworksEnum.litecoin, TRANSACTION_FLOW_LEGACY],
+        [BitqueryNetworksEnum.dash, TRANSACTION_FLOW_LEGACY],
+        [BitqueryNetworksEnum.dogecoin, TRANSACTION_FLOW_LEGACY],
+        [BitqueryNetworksEnum.zcash, TRANSACTION_FLOW_LEGACY],
+    ])

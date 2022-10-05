@@ -14,7 +14,7 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
 
     //TODO: add balance and transaction history details for tooltip
     // const data = nodeData.data.data.data;
-
+    console.log('nodedata', nodeData);
     const addrSubstring: string = `${nodeData.data.id.substring(0, 8)}...${nodeData.data.id.substring(
         nodeData.data.id.length - 8,
         nodeData.data.id.length
@@ -22,12 +22,14 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
 
     const labelContent: JSX.Element = (
         <div>
-            <div>
-                {' '}
-                {nodeData.data.data.annotation !== undefined && nodeData.data.data.annotation.length > 0
-                    ? nodeData.data.data.annotation
-                    : addrSubstring}{' '}
-            </div>{' '}
+            <Tooltip
+                overlay={<a className="text-blue-500 text-underline text-lg font-bold display:block" href="https://etherscan.io/address/0x0E9363c3492253384C4f6cC3FCb61e51b537F8F4?agerange=2022-09-20~2022-09-29"><div>View in explorer:</div><div className="underline text-sm">{nodeData.data.id}</div> </a>} color={'#404040'}>
+                <div>
+                    {nodeData.data.data.annotation !== undefined && nodeData.data.data.annotation.length > 0
+                        ? nodeData.data.data.annotation
+                        : addrSubstring}{' '}
+                </div>
+            </Tooltip>
             <Tooltip title={'Double click a node to retrieve more transactions.'} color={'#404040'}>
                 <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
             </Tooltip>{' '}
@@ -60,6 +62,7 @@ const newNode = (nodeData: HierarchyPointNode<TreeNode<any>>, incoming: boolean)
 
 const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean) => {
 
+    console.log("edgeData", edgeData);
     const recipient = edgeData.target.data.id;
     const sender = edgeData.source.data.id;
     const edgeSourceAddress = incoming ? recipient : sender;
@@ -83,6 +86,13 @@ const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean)
             id: `${transactionHash}-${edgeSourceAddress}->${edgeTargetAddress}`,
             source: edgeSourceAddress,
             target: edgeTargetAddress,
+            data: {
+                txHash: transactionHash,
+                sender: edgeSourceAddress,
+                recipient: edgeTargetAddress,
+                currency: currencySymbol,
+                amount: data.amount,
+            },
             label: `${currencyAmount
                 } ${currencySymbol}`,
             labelStyle: labelStyle,

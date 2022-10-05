@@ -90,7 +90,7 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     setRoot ? setRootData(initialRootData) : setRootData(rootData);
 
     const transactionFlowData = await getTransactionData(inputAddress);
-    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map);
+    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map, queryParams.network);
 
     const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
     setNodes(initialElements.nodes);
@@ -98,20 +98,50 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     setLoading(false);
   }
 
+  const [show, setShow] = useState(false);
+  const [edgeInfo, setEdgeInfo] = useState({
+    txHash: '',
+    sender: '',
+    receiver: '',
+    value: '',
+    currency: ''
+  });
+
   return (
     <div className="relative grid grid-cols-4 h-[700px] w-full bg-gray-100 border border-b-0 border-zinc-900">
+      <div className={`${show ? '' : 'hidden'} absolute top-1/5 left-0 w-96 h-[500px] bg-green-500 z-50 grid grid-rows`}>
+        <div>
+          Transaction Details:
+        </div>
+        <div>
+          Sender: {edgeInfo.sender}
+        </div>
+        <div>
+          Receiver: {edgeInfo.receiver}
+        </div>
+      </div>
       <div className="col-span-4 w-full h-full border border-t-0 border-l-0 border-r-0 border-zinc-900">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onNodeDoubleClick={(_, node: Node) => setGraphLayout(node.id, false)}
+          onEdgeClick={() => { alert('hey') }}
+          onEdgeMouseEnter={(e, edge) => {
+            console.log('hit', e, 'edge,', edge)
+            setShow(!show)
+            setEdgeInfo({
+              ...edgeInfo,
+              sender: edge.source,
+              receiver: edge.target,
+            })
+          }}
           minZoom={-Infinity}
           zoomOnScroll={true}
           style={{ background: '#f4f4f4' }}
           fitView
+          proOptions={{ account: 'paid-pro', hideAttribution: true }}
         >
-          <Controls />
         </ReactFlow>
       </div>
       {loading ? (
