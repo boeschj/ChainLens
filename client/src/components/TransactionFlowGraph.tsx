@@ -2,7 +2,6 @@ import ReactFlow, { Controls, useEdgesState, useNodesState, Node } from "react-f
 import { LoadingOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { client } from "../gql/apolloClient";
-import { TRANSACTION_FLOW_ETHEREUM } from "../gql/queries/transactionFlow_Ethereum";
 import { IQueryParams } from "../pages/TransactionFlow";
 import { mapDataToHierarchyLayout } from "../graphUtils/buildGraphLayout";
 import { getReactFlowNodesAndEdges } from "../graphUtils/buildNodesAndEdges";
@@ -50,8 +49,6 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
         }
       });
 
-      console.log(response);
-
       if (response.data.EthereumTransactionFlow) {
         return response.data.EthereumTransactionFlow;
       }
@@ -90,7 +87,7 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     setRoot ? setRootData(initialRootData) : setRootData(rootData);
 
     const transactionFlowData = await getTransactionData(inputAddress);
-    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map);
+    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map, queryParams.network);
 
     const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
     setNodes(initialElements.nodes);
@@ -110,6 +107,7 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
           zoomOnScroll={true}
           style={{ background: '#f4f4f4' }}
           fitView
+          proOptions={{ account: 'paid-pro', hideAttribution: true }}
         >
           <Controls />
         </ReactFlow>

@@ -83,6 +83,13 @@ const newEdge = (edgeData: HierarchyPointLink<TreeNode<any>>, incoming: boolean)
             id: `${transactionHash}-${edgeSourceAddress}->${edgeTargetAddress}`,
             source: edgeSourceAddress,
             target: edgeTargetAddress,
+            data: {
+                txHash: transactionHash,
+                sender: edgeSourceAddress,
+                recipient: edgeTargetAddress,
+                currency: currencySymbol,
+                amount: data.amount,
+            },
             label: `${currencyAmount
                 } ${currencySymbol}`,
             labelStyle: labelStyle,
