@@ -17,6 +17,7 @@
     "craco-antd": "^2.0.0",
     "d3-hierarchy": "^3.1.2",
     "graphql": "^16.6.0",
+    "next": "^12.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-flow-renderer": "^10.3.17",

@@ -1,8 +1,7 @@
-import ReactFlow, { Controls, useEdgesState, useNodesState, Node } from "react-flow-renderer";
+import ReactFlow, { Controls, useEdgesState, useNodesState, Node, useReactFlow } from "react-flow-renderer";
 import { LoadingOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { client } from "../gql/apolloClient";
-import { TRANSACTION_FLOW_ETHEREUM } from "../gql/queries/transactionFlow_Ethereum";
 import { IQueryParams } from "../pages/TransactionFlow";
 import { mapDataToHierarchyLayout } from "../graphUtils/buildGraphLayout";
 import { getReactFlowNodesAndEdges } from "../graphUtils/buildNodesAndEdges";
@@ -39,6 +38,12 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  const { fitView } = useReactFlow();
+
+  useEffect(() => {
+    fitView();
+  }, [nodes, fitView]);
+
   const getTransactionData = async (inputAddress: string) => {
     try {
 
@@ -50,17 +55,15 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
         }
       });
 
-      console.log(response);
-
-      if (response.data.EthereumTransactionFlow) {
-        return response.data.EthereumTransactionFlow;
+      if (response.data.ethereum) {
+        return response.data.ethereum;
       }
 
-      if (response.data.LegacyTransactionFlow) {
-        return response.data.LegacyTransactionFlow;
+      if (response.data.bitcoin) {
+        return response.data.bitcoin;
       }
 
-      if (!response.data.EthereumTransactionFlow && !response.data.LegacyTransactionFlow) {
+      if (!response.data.ethereum && !response.data.bitcoin) {
         setLoading(false);
         throw new Error("No transactions were found for this address. Please adjust your parameters and try again.");
       }
