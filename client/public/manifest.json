@@ -1,6 +1,6 @@
 {
-  "short_name": "Blocktrace",
-  "name": "Blocktrace-visualize blockchain data",
+  "short_name": "ChainLens",
+  "name": "ChainLens-visualize blockchain data",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,12 +8,12 @@
       "type": "image/x-icon"
     },
     {
-      "src": "blocktraceHypercube.png",
+      "src": "ChainLens.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "blocktraceHypercube.png",
+      "src": "ChainLens.png",
       "type": "image/png",
       "sizes": "512x512"
     }
