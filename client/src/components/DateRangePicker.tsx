@@ -7,12 +7,10 @@ const { RangePicker } = DatePicker;
 const ALL_TIME_DATE = "2009-01-11T19:30:00";
 
 interface DateRangePickerProps {
-  queryParams: IQueryParams;
   setQueryParams: React.Dispatch<React.SetStateAction<IQueryParams>>;
 }
 
 const DateRangePicker: React.FC<DateRangePickerProps> = ({
-  queryParams,
   setQueryParams,
 }) => {
   const handleDateRangeChange: RangePickerProps["onChange"] = (dates) => {

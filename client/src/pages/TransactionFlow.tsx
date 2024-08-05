@@ -51,14 +51,8 @@ const TransactionFlow: React.FC = (): JSX.Element => {
       </div>
       <div className="h-20 flex items-center justify-center px-2">
         <Row className="w-full flex items-center space-x-2">
-          <DropdownListSelect
-            queryParams={queryParams}
-            setQueryParams={setQueryParams}
-          />
-          <DateRangePicker
-            queryParams={queryParams}
-            setQueryParams={setQueryParams}
-          />
+          <DropdownListSelect setQueryParams={setQueryParams} />
+          <DateRangePicker setQueryParams={setQueryParams} />
           <Input
             onChange={(e) => {
               setAddress(e.target.value.trim());
