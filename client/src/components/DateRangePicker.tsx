@@ -4,33 +4,50 @@ import moment from "moment";
 import { IQueryParams } from "../pages/TransactionFlow";
 const { RangePicker } = DatePicker;
 
-interface IDateRangePicker {
-    queryParams: IQueryParams,
-    setQueryParams: React.Dispatch<React.SetStateAction<IQueryParams>>
-};
+const ALL_TIME_DATE = "2009-01-11T19:30:00";
 
-const DateRangePicker: React.FC<IDateRangePicker> = ({ queryParams, setQueryParams }: IDateRangePicker): JSX.Element => {
+interface DateRangePickerProps {
+  queryParams: IQueryParams;
+  setQueryParams: React.Dispatch<React.SetStateAction<IQueryParams>>;
+}
 
-    const onDateRangeChange: RangePickerProps['onChange'] = (dates) => {
-        if (dates)
-            setQueryParams({ ...queryParams, from: dates[0]!.toISOString(), till: dates[1]!.toISOString() });
-    };
+const DateRangePicker: React.FC<DateRangePickerProps> = ({
+  queryParams,
+  setQueryParams,
+}) => {
+  const handleDateRangeChange: RangePickerProps["onChange"] = (dates) => {
+    if (dates && dates[0] && dates[1]) {
+      const fromDate = dates[0].toDate();
+      const tillDate = dates[1].toDate();
 
-    return (
-        <Space direction="vertical" size={10} style={{ width: '230px' }}>
-            <RangePicker
-                ranges={{
-                    'Today': [moment(), moment()],
-                    'This Week': [moment().startOf('week'), moment()],
-                    'This Month': [moment().startOf('month'), moment()],
-                    'This Year': [moment().startOf('year'), moment()],
-                    'All Time': [moment("2009-01-11T19:30:00"), moment()]
-                }}
-                format="MM/DD/YYYY"
-                defaultValue={[moment().startOf('week'), moment()]}
-                onChange={onDateRangeChange} />
-        </Space>
-    );
+      setQueryParams((prevParams) => ({
+        ...prevParams,
+        from: fromDate.toISOString(),
+        till: tillDate.toISOString(),
+      }));
+    }
+  };
+
+  const now = moment();
+
+  const dateRanges: RangePickerProps["ranges"] = {
+    Today: [now, now],
+    "This Week": [moment().startOf("week"), now],
+    "This Month": [moment().startOf("month"), now],
+    "This Year": [moment().startOf("year"), now],
+    "All Time": [moment(ALL_TIME_DATE), now],
+  };
+
+  return (
+    <Space direction="vertical" size={10} style={{ width: "230px" }}>
+      <RangePicker
+        ranges={dateRanges}
+        format="MM/DD/YYYY"
+        defaultValue={[moment().startOf("week"), now]}
+        onChange={handleDateRangeChange}
+      />
+    </Space>
+  );
 };
 
 export default DateRangePicker;
