@@ -1,5 +1,11 @@
-import ReactFlow, { Controls, useEdgesState, useNodesState, Node, useReactFlow } from "react-flow-renderer";
-import { LoadingOutlined } from '@ant-design/icons';
+import ReactFlow, {
+  Controls,
+  useEdgesState,
+  useNodesState,
+  Node,
+  useReactFlow,
+} from "react-flow-renderer";
+import { LoadingOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { client } from "../gql/apolloClient";
 import { IQueryParams } from "../pages/TransactionFlow";
@@ -10,25 +16,24 @@ import { Modal } from "antd";
 import { NetworkToQueryMappings } from "../constants/BitqueryNetworksEnum";
 
 interface IGraphInputs {
-  address: string,
-  search: boolean,
-  setSearch: React.Dispatch<React.SetStateAction<boolean>>,
-  queryParams: IQueryParams
+  address: string;
+  search: boolean;
+  setSearch: React.Dispatch<React.SetStateAction<boolean>>;
+  queryParams: IQueryParams;
 }
 
 const map: Map<string, TreeNode<any>> = new Map();
 
-const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSearch, queryParams }: IGraphInputs): JSX.Element => {
+const TransactionFlowGraph: React.FC<IGraphInputs> = ({
+  address,
+  search,
+  setSearch,
+  queryParams,
+}: IGraphInputs): JSX.Element => {
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
-  const [rootData, setRootData] = useState(
-    new TreeNode<any>(
-      map,
-      {},
-      ''
-    )
-  );
+  const [rootData, setRootData] = useState(new TreeNode<any>(map, {}, ""));
 
   useEffect(() => {
     if (search) {
@@ -38,21 +43,14 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const { fitView } = useReactFlow();
-
-  useEffect(() => {
-    fitView();
-  }, [nodes, fitView]);
-
   const getTransactionData = async (inputAddress: string) => {
     try {
-
       const response = await client.query({
         query: NetworkToQueryMappings.get(queryParams.network)!,
         variables: {
           ...queryParams,
-          address: inputAddress
-        }
+          address: inputAddress,
+        },
       });
 
       if (response.data.ethereum) {
@@ -65,41 +63,50 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
 
       if (!response.data.ethereum && !response.data.bitcoin) {
         setLoading(false);
-        throw new Error("No transactions were found for this address. Please adjust your parameters and try again.");
+        throw new Error(
+          "No transactions were found for this address. Please adjust your parameters and try again."
+        );
       }
-
     } catch (e: any) {
       Modal.error({
         title: "Error",
-        content: e.message
-      })
-      setRootData(
-        new TreeNode<any>(
-          map,
-          {},
-          ''
-        )
-      );
+        content: e.message,
+      });
+      setRootData(new TreeNode<any>(map, {}, ""));
       setNodes([]);
       setEdges([]);
       setLoading(false);
       throw new Error();
     }
-  }
+  };
 
-  const setGraphLayout = async (inputAddress: string, setRoot: boolean = false) => {
+  const setGraphLayout = async (
+    inputAddress: string,
+    setRoot: boolean = false
+  ) => {
     setLoading(true);
     const initialRootData = new TreeNode(map, {}, address);
     setRoot ? setRootData(initialRootData) : setRootData(rootData);
 
     const transactionFlowData = await getTransactionData(inputAddress);
-    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(inputAddress, transactionFlowData, setRoot, initialRootData, rootData, map, queryParams.network);
+    const { nodesIncoming, nodesOutgoing } = mapDataToHierarchyLayout(
+      inputAddress,
+      transactionFlowData,
+      setRoot,
+      initialRootData,
+      rootData,
+      map,
+      queryParams.network
+    );
 
-    const initialElements = getReactFlowNodesAndEdges(nodesIncoming, nodesOutgoing);
+    const initialElements = getReactFlowNodesAndEdges(
+      nodesIncoming,
+      nodesOutgoing
+    );
     setNodes(initialElements.nodes);
     setEdges(initialElements.edges);
     setLoading(false);
-  }
+  };
 
   return (
     <div className="relative grid grid-cols-4 h-[700px] w-full bg-gray-100 border border-b-0 border-zinc-900">
@@ -111,9 +118,9 @@ const TransactionFlowGraph: React.FC<IGraphInputs> = ({ address, search, setSear
           onNodeDoubleClick={(_, node: Node) => setGraphLayout(node.id, false)}
           minZoom={-Infinity}
           zoomOnScroll={true}
-          style={{ background: '#f4f4f4' }}
+          style={{ background: "#f4f4f4" }}
           fitView={true}
-          proOptions={{ account: 'paid-pro', hideAttribution: true }}
+          proOptions={{ account: "paid-pro", hideAttribution: true }}
         >
           <Controls />
         </ReactFlow>
